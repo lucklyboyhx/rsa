@@ -1,0 +1,72 @@
+<html>
+  <head>
+    <title>jsencrypt使用</title>
+    <script src="./jquery-3.3.1.min.js"></script>
+	<script src="./jquery-3.3.1.js"></script>
+	<script src="./jsencrypt.js"></script>
+    <script src="./jsencrypt.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            $('#submit').click(function() {
+                var data = [];
+                data['username']= $('#username').val();
+                data['passwd']= $('#passwd').val();
+      
+                var publickey = $('#publickey').val();
+                encryptSend('http://127.0.0.1:8081/v2/test', data, publickey);  // Jsencrypt.do对应服务端处理地址
+            });
+        });
+
+        // 使用jsencrypt库加密前端参数
+        function encryptSend(url, data, publicKey){
+		
+		console.info(url);
+		console.info(data);
+            var jsencrypt = new JSEncrypt();
+			console.info(jsencrypt);
+            jsencrypt.setPublicKey(publicKey);
+            // enData用来装载加密后的数据
+            var enData = new Object();
+            // 将参数用jsencrypt加密后赋给enData
+            for(var key in data){
+			console.info(key);
+			console.info(data[key]);
+                enData[key] = jsencrypt.encrypt(data[key]);
+            }
+			console.info(enData);
+          
+            $.ajax({
+                url: url,
+                type: 'post',
+                data: enData,
+                dataType: 'json',
+                success: function (data) {                    
+                    console.info(data);
+                },
+                error: function (xhr) {
+                    console.error('Something went wrong....');
+                }
+            });
+        }
+    </script>
+  </head>
+  <body>
+    <label for="publickey">Public Key</label><br/>
+    <textarea id="publickey" rows="20" cols="60">
+        -----BEGIN RSA PUBLIC KEY-----
+        MIICXQIBAAKBgQDlOJu6TyygqxfWT7eLtGDwajtNFOb9I5XRb6khyfD1Yt3YiCgQ
+        WMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76xFxdU6jE0NQ+Z+zEdhUTooNR
+        aY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4gwQco1KRMDSmXSMkDwIDAQAB
+        AoGAfY9LpnuWK5Bs50UVep5c93SJdUi82u7yMx4iHFMc/Z2hfenfYEzu+57fI4fv
+        xTQ//5DbzRR/XKb8ulNv6+CHyPF31xk7YOBfkGI8qjLoq06V+FyBfDSwL8KbLyeH
+        m7KUZnLNQbk8yGLzB3iYKkRHlmUanQGaNMIJziWOkN+N9dECQQD0ONYRNZeuM8zd
+        -----END RSA PUBLIC KEY-----
+    </textarea>
+    <br/>
+    <label for="input">jsencrypt:</label><br/>
+    name:<input id="username" name="username" type="text"></input><br/>
+    password:<input id="passwd" name="passwd" type="password"></input><br/>
+    <input id="submit" type="button" value="submit" />
+  </body>
+  
+</html>
